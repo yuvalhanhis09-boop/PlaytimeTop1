@@ -2,6 +2,7 @@ package com.maxd.playtimetop;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,20 +21,26 @@ public class PlaytimeService {
     }
 
     public void startTickTask() {
-        // Tick every second; accumulate session seconds for online players
-        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            long now = System.currentTimeMillis();
-            Bukkit.getOnlinePlayers().forEach(p -> {
-                UUID id = p.getUniqueId();
-                Long prev = lastTick.getOrDefault(id, now);
-                long delta = Math.max(0, (now - prev) / 1000);
-                sessionSeconds.merge(id, delta, Long::sum);
-                lastTick.put(id, now);
-            });
-        }, 20L, 20L);
+        // טיק כל שנייה – צבירת זמן לשחקנים מחוברים
+        new BukkitRunnable() {
+            @Override public void run() {
+                long now = System.currentTimeMillis();
+                Bukkit.getOnlinePlayers().forEach(p -> {
+                    UUID id = p.getUniqueId();
+                    Long prev = lastTick.getOrDefault(id, now);
+                    long delta = Math.max(0, (now - prev) / 1000);
+                    sessionSeconds.merge(id, delta, Long::sum);
+                    lastTick.put(id, now);
+                });
+            }
+        }.runTaskTimer(plugin, 20L, 20L);
 
-        // Persist every 60 seconds
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::flush, 20L * 60, 20L * 60);
+        // שמירה לדיסק כל 60 שניות (אסינכרוני)
+        new BukkitRunnable() {
+            @Override public void run() {
+                flush();
+            }
+        }.runTaskTimerAsynchronously(plugin, 20L * 60, 20L * 60);
     }
 
     public void touch(UUID id, String name) {
@@ -102,3 +109,4 @@ public class PlaytimeService {
         public PlayerEntry(String name, long seconds) { this.name = name; this.seconds = seconds; }
     }
 }
+
