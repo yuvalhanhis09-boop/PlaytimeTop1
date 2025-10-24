@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
@@ -30,7 +31,11 @@ public class ScoreboardService {
     }
 
     public void startUpdateTask() {
-        Bukkit.getScheduler().runTaskTimer(plugin, this::updateAll, 20L, 20L * 5); // update every 5s
+        new BukkitRunnable() {
+            @Override public void run() {
+                updateAll();
+            }
+        }.runTaskTimer(plugin, 20L, 20L * 5); // עדכון כל 5 שניות
     }
 
     public void updateAll() {
