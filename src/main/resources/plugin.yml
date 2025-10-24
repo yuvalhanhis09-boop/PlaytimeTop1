@@ -1,0 +1,17 @@
+name: PlayTimeTop
+main: com.maxd.playtimetop.PlayTimeTopPlugin
+version: 1.0.0
+api-version: '1.21'
+authors: [ MaxD ]
+description: Top 10 Playtime scoreboard with toggle (Hebrew), persistent, Aternos-ready
+
+commands:
+  pttoggle:
+    description: Toggle the PlayTimeTop scoreboard on/off
+    aliases: [ptimeboard, ptt]
+    usage: /pttoggle
+
+permissions:
+  playtimetop.toggle:
+    description: Allow toggling scoreboard
+    default: true
